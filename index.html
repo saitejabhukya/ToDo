@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart To-Do List</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #eef2f3;
+            text-align: center;
+            margin: 20px;
+        }
+        .wrapper {
+            max-width: 480px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        h2 { color: #444; }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background: #0056b3; }
+        .task {
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-radius: 5px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 6px 0;
+            transition: transform 0.3s ease;
+        }
+        .task:hover { transform: scale(1.03); }
+        .done { text-decoration: line-through; color: gray; }
+        .actions button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            margin-left: 6px;
+        }
+        .actions .edit { color: #ffc107; }
+        .actions .remove { color: #dc3545; }
+        .high-priority { color: red; font-weight: bold; }
+        .medium-priority { color: orange; font-weight: bold; }
+        .low-priority { color: green; font-weight: bold; }
+        #searchBar { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <h2>📋 Smart To-Do List</h2>
+        <input id="searchBar" type="text" placeholder="🔍 Search tasks..." onkeyup="searchTasks()">
+        <input id="taskTitle" type="text" placeholder="Enter Task Title">
+        <input id="taskDesc" type="text" placeholder="Enter Task Details">
+        <input id="taskDate" type="date">
+        <input id="taskTime" type="time">
+        
+        <select id="taskPriority">
+            <option value="high">🔥 High Priority</option>
+            <option value="medium">⚡ Medium Priority</option>
+            <option value="low">🌱 Low Priority</option>
+        </select>
+        
+        <select id="taskCategory">
+            <option value="work">💼 Work</option>
+            <option value="personal">🏠 Personal</option>
+            <option value="shopping">🛒 Shopping</option>
+            <option value="other">🌍 Other</option>
+        </select>
+        
+        <button onclick="createTask()">➕ Add Task</button>
+
+        <h3>Task List:</h3>
+        <div id="taskContainer"></div>
+    </div>
+
+    <script>
+        let taskList = JSON.parse(localStorage.getItem("taskList")) || [];
+
+        function displayTasks(filterText = "") {
+            const taskContainer = document.getElementById("taskContainer");
+            taskContainer.innerHTML = "";
+
+            taskList.forEach((task, index) => {
+                if (!task.title.toLowerCase().includes(filterText.toLowerCase())) return;
+
+                let priorityClass = task.priority === "high" ? "high-priority" : 
+                                    task.priority === "medium" ? "medium-priority" : "low-priority";
+
+                taskContainer.innerHTML += `
+                    <div class="task ${task.done ? 'done' : ''}">
+                        <div>
+                            <strong class="${priorityClass}">${task.title}</strong> - ${task.details} <br>
+                            <small>📅 ${task.date} ⏰ ${task.time} | ${task.category}</small>
+                        </div>
+                        <div class="actions">
+                            <button class="edit" onclick="modifyTask(${index})">✏</button>
+                            <button class="remove" onclick="removeTask(${index})">🗑</button>
+                            <button onclick="toggleStatus(${index})">${task.done ? '✅' : '⬜'}</button>
+                        </div>
+                    </div>
+                `;
+            });
+            localStorage.setItem("taskList", JSON.stringify(taskList));
+        }
+
+        function createTask() {
+            const title = document.getElementById("taskTitle").value.trim();
+            const details = document.getElementById("taskDesc").value.trim();
+            const date = document.getElementById("taskDate").value;
+            const time = document.getElementById("taskTime").value;
+            const priority = document.getElementById("taskPriority").value;
+            const category = document.getElementById("taskCategory").value;
+
+            if (!title) return alert("Task title is required!");
+
+            taskList.push({ title, details, date, time, priority, category, done: false });
+
+            document.getElementById("taskTitle").value = "";
+            document.getElementById("taskDesc").value = "";
+            document.getElementById("taskDate").value = "";
+            document.getElementById("taskTime").value = "";
+            document.getElementById("taskPriority").value = "medium";
+            document.getElementById("taskCategory").value = "other";
+
+            displayTasks();
+        }
+
+        function toggleStatus(index) {
+            taskList[index].done = !taskList[index].done;
+            displayTasks();
+        }
+
+        function modifyTask(index) {
+            const newTitle = prompt("Update Task Title", taskList[index].title);
+            if (newTitle) {
+                taskList[index].title = newTitle;
+                displayTasks();
+            }
+        }
+
+        function removeTask(index) {
+            taskList.splice(index, 1);
+            displayTasks();
+        }
+
+        function searchTasks() {
+            const searchInput = document.getElementById("searchBar").value;
+            displayTasks(searchInput);
+        }
+
+        displayTasks();
+    </script>
+
+</body>
+</html>
+
+
+
+
+        
+
+
